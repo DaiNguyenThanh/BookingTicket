@@ -13,30 +13,32 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
+
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="0dp"
+                android:layout_marginTop="18dp"
                 android:text="Register"
-                android:textSize="45dp"
                 android:textAlignment="center"
                 android:textColor="@color/white"
-                android:layout_marginTop="18dp"
-                android:layout_marginStart="32dp"
-                android:textStyle="bold"/>
+                android:textSize="45dp"
+                android:textStyle="bold" />
+
             <EditText
                 android:id="@+id/edtUsername"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
+                android:layout_marginStart="32dp"
+                android:layout_marginTop="96dp"
+                android:layout_marginEnd="32dp"
+                android:background="@drawable/edittext_background"
                 android:ems="10"
                 android:hint="User Name"
+                android:inputType="text"
                 android:paddingLeft="10dp"
                 android:textColor="@color/white"
-                android:textColorHint="#a8a4a4"
-                android:background="@drawable/edittext_background"
-                android:layout_marginTop="140dp"
-                android:layout_marginStart="32dp"
-                android:layout_marginEnd="32dp"
-                android:inputType="text"/>
+                android:textColorHint="#a8a4a4" />
             <EditText
                 android:id="@+id/edtEmail"
                 android:layout_width="match_parent"
@@ -67,17 +69,17 @@
                 android:inputType="textPassword"/>
 
             <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnLogin"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/btnLogin"
-                android:layout_marginTop="100dp"
                 android:layout_marginStart="32dp"
+                android:layout_marginTop="64dp"
                 android:layout_marginEnd="32dp"
                 android:background="@drawable/orange_btn_background"
-                android:textSize="18sp"
-                android:textStyle="bold"
+                android:text="register"
                 android:textColor="@color/white"
-                android:text="register"/>
+                android:textSize="18sp"
+                android:textStyle="bold" />
             <TextView
                 android:id="@+id/textView7"
                 android:layout_width="match_parent"
@@ -87,7 +89,7 @@
                 android:textColor="@color/white"
                 android:textSize="16sp"/>
             <TextView
-                android:id="@+id/textView8"
+                android:id="@+id/btnLoginView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Login Now"
