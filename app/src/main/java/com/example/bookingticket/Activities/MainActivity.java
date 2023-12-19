@@ -11,8 +11,10 @@ import androidx.viewpager2.widget.MarginPageTransformer;
 import androidx.viewpager2.widget.ViewPager2;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -42,6 +44,8 @@ public class MainActivity extends AppCompatActivity {
     private RequestQueue  mRequestQueue;
     private LinearLayout tabCinema;
     private LinearLayout tabHome;
+    private LinearLayout tabAccount;
+
 
 
     private NestedScrollView scrollView;
@@ -51,6 +55,18 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
+        tabAccount = findViewById(R.id.tabAccount);
+        tabAccount.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                scrollView = findViewById(R.id.fragmentContainer);
+                scrollView.removeAllViews();
+                scrollView.scrollTo(0, 0);
+                AccountFragment accountFragment = new AccountFragment();
+                getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainer, accountFragment).commit();
+            }
+        });
         tabCinema = findViewById(R.id.tabCinema);
         tabCinema.setOnClickListener(new View.OnClickListener() {
             @Override
