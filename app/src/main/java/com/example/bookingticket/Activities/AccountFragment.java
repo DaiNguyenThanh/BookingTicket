@@ -1,27 +1,42 @@
 package com.example.bookingticket.Activities;
 
+import static android.content.ContentValues.TAG;
 import static android.content.Context.MODE_PRIVATE;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.example.bookingticket.R;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 public class AccountFragment extends Fragment {
     private  Button btnSignIn;
 
     private Button btnSignUp;
     private Button btnLogOut;
+    private TextView showAddress;
+    private TextView showEmail;
+    private TextView showPhone;
+    private TextView showName;
+
 
 
     // This is called when the fragment is created
@@ -39,9 +54,51 @@ public class AccountFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-                btnLogOut = view.findViewById(R.id.btnLogOut);
+        btnLogOut = view.findViewById(R.id.btnLogOut);
         checkLoginState();
-        // Set click listener
+        showName = view.findViewById(R.id.showName);
+        showAddress = view.findViewById(R.id.showAddress);
+        showEmail=view.findViewById((R.id.showEmail));
+        showPhone=view.findViewById((R.id.showPhone));
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(requireContext());
+        String userUid = preferences.getString("userUid", "");
+        String userName = preferences.getString("userName", "");
+        String userEmail = preferences.getString("userEmail", "");
+        showEmail.setText(userEmail);
+
+
+        // Set up Firebase Firestore
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        DocumentReference userDocRef = db.collection("users").document(userUid);
+
+        // Retrieve additional user information from Firestore
+        userDocRef.get()
+                .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                    @Override
+                    public void onSuccess(DocumentSnapshot documentSnapshot) {
+                        if (documentSnapshot.exists()) {
+                            // DocumentSnapshot contains the data
+                            String fullName = documentSnapshot.getString("fullName");
+                            String address = documentSnapshot.getString("phone");
+                            showPhone.setText(documentSnapshot.getString("address"));
+                            // Update UI with additional user details
+                            showName.setText(fullName);
+                            showAddress.setText(address);
+                        } else {
+                            // Handle the case where the document does not exist
+                            Log.d(TAG, "Document does not exist");
+                        }
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        // Handle exceptions
+                        Log.e(TAG, "Error getting document", e);
+                    }
+                });
+
+        // Set click listener for logout button
         btnLogOut.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -53,8 +110,8 @@ public class AccountFragment extends Fragment {
                 getActivity().finish();
             }
         });
-
     }
+
     private void checkLoginState() {
         // Use PreferenceManager for Fragments
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(requireContext());

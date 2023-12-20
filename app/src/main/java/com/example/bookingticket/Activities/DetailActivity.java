@@ -138,25 +138,25 @@ public class DetailActivity extends AppCompatActivity {
         descriptionTextView.setText(datum.getPlot());
 
         List<String> images = datum.getImages();
-        if (images != null && !images.isEmpty()) {
-            // Assuming you have an ImageView for each additional image
-            ImageView additionalImageView1 = findViewById(R.id.imageView2);
-            ImageView additionalImageView2 = findViewById(R.id.imageView3);
-            Glide.with(this)
-                    .load(images.get(2))  // Assuming getPoster() returns the image URL
-                    .into(imageView);
-            // Load the first additional image
-            Glide.with(this)
-                    .load(images.get(0))
-                    .into(additionalImageView1);
-
-            // Load the second additional image
-            Glide.with(this)
-                    .load(images.get(1))
-                    .into(additionalImageView2);
-
-            // Add more ImageViews and load more images as needed
-        }
+//        if (images != null && !images.isEmpty()) {
+//            // Assuming you have an ImageView for each additional image
+//            ImageView additionalImageView1 = findViewById(R.id.imageView2);
+//            ImageView additionalImageView2 = findViewById(R.id.imageView3);
+//            Glide.with(this)
+//                    .load(images.get(2))  // Assuming getPoster() returns the image URL
+//                    .into(imageView);
+//            // Load the first additional image
+//            Glide.with(this)
+//                    .load(images.get(0))
+//                    .into(additionalImageView1);
+//
+//            // Load the second additional image
+//            Glide.with(this)
+//                    .load(images.get(1))
+//                    .into(additionalImageView2);
+//
+//            // Add more ImageViews and load more images as needed
+//        }
     }
 }
 
