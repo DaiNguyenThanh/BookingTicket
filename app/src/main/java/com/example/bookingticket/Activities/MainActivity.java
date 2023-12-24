@@ -28,9 +28,13 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.bookingticket.Adapters.MovieListAdapter;
 import com.example.bookingticket.Adapters.SliderAdapters;
+import com.example.bookingticket.Domain.Datum;
 import com.example.bookingticket.Domain.ListMovie;
 import com.example.bookingticket.Domain.SliderItem;
 import com.example.bookingticket.R;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
@@ -40,21 +44,24 @@ public class MainActivity extends AppCompatActivity {
     private ViewPager2 viewPager2;
     private RecyclerView.Adapter adapterShowingNow, adapterComingSoon;
     private RecyclerView recyclerViewShowingNow, recyclerViewComingSoon;
-    private StringRequest mStringRequest, mStringRequest2, mStringRequest3;
-    private RequestQueue  mRequestQueue;
     private LinearLayout tabCinema;
     private LinearLayout tabHome;
     private LinearLayout tabAccount;
 
-
+    private FirebaseFirestore db;
+    private CollectionReference moviesCollection;
 
     private NestedScrollView scrollView;
     private Handler sliderHander = new Handler();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // Initialize Firebase
+        db = FirebaseFirestore.getInstance();
+        moviesCollection = db.collection("films");
 
         tabAccount = findViewById(R.id.tabAccount);
         tabAccount.setOnClickListener(new View.OnClickListener() {
@@ -67,6 +74,7 @@ public class MainActivity extends AppCompatActivity {
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainer, accountFragment).commit();
             }
         });
+
         tabCinema = findViewById(R.id.tabCinema);
         tabCinema.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -78,50 +86,66 @@ public class MainActivity extends AppCompatActivity {
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainer, cinemaFragment).commit();
             }
         });
+
         tabHome = findViewById(R.id.tabHome);
         tabHome.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Return to the main activity by restarting it
                 Intent intent = new Intent(MainActivity.this, MainActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
                 finish();
             }
         });
+
         initView();
         banner();
         sendRequest();
-        sendRequestComingSoon();
-
+        sendRequestComingSoon(); // Uncomment and implement if needed
     }
 
     private void sendRequest() {
-        mRequestQueue = Volley.newRequestQueue(this);
-        mStringRequest = new StringRequest(Request.Method.GET, "https://moviesapi.ir/api/v1/movies?page=1", new Response.Listener<String>() {
-            @Override
-            public void onResponse(String response) {
-                Gson gson = new Gson();
-                ListMovie items = gson.fromJson(response, ListMovie.class);
-                adapterShowingNow = new MovieListAdapter(items);
-                recyclerViewShowingNow.setAdapter(adapterShowingNow);
-            }
-        }, error -> Log.i("errror", "onErrorRequest: " + error.toString()));
-        mRequestQueue.add(mStringRequest);
+        moviesCollection.get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    List<Datum> data = new ArrayList<>();
+
+                    for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
+                        Datum datum = document.toObject(Datum.class);
+                        datum.setId(document.getId());
+
+                        data.add(datum);
+                    }
+
+                    ListMovie listMovie = new ListMovie();
+                    listMovie.setData(data);
+                    adapterShowingNow = new MovieListAdapter(listMovie);
+                    recyclerViewShowingNow.setAdapter(adapterShowingNow);
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("error", "Error getting movies: ", e);
+                });
     }
     private void sendRequestComingSoon() {
-        mRequestQueue = Volley.newRequestQueue(this);
-        mStringRequest2 = new StringRequest(Request.Method.GET, "https://moviesapi.ir/api/v1/movies?page=1", new Response.Listener<String>() {
-            @Override
-            public void onResponse(String response) {
-                Gson gson = new Gson();
-                ListMovie items = gson.fromJson(response, ListMovie.class);
-                adapterComingSoon = new MovieListAdapter(items);
-                recyclerViewComingSoon.setAdapter(adapterComingSoon);
-            }
-        }, error -> Log.i("errror", "onErrorRequest: " + error.toString()));
-        mRequestQueue.add(mStringRequest2);
+        moviesCollection.get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    List<Datum> data = new ArrayList<>();
+
+                    for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
+                        Datum datum = document.toObject(Datum.class);
+                        datum.setId(document.getId());
+                        data.add(datum);
+                    }
+
+                    ListMovie listMovie = new ListMovie();
+                    listMovie.setData(data);
+                    adapterShowingNow = new MovieListAdapter(listMovie);
+                    recyclerViewComingSoon.setAdapter(adapterShowingNow);
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("error", "Error getting movies: ", e);
+                });
     }
+    // Implement sendRequestComingSoon() if needed
 
     private void banner() {
         List<SliderItem> sliderItems = new ArrayList<>();
@@ -138,12 +162,9 @@ public class MainActivity extends AppCompatActivity {
 
         CompositePageTransformer compositePageTransformer = new CompositePageTransformer();
         compositePageTransformer.addTransformer(new MarginPageTransformer(40));
-        compositePageTransformer.addTransformer(new ViewPager2.PageTransformer() {
-            @Override
-            public void transformPage(@NonNull View page, float position) {
-                float r = Math.abs(position);
-                page.setScaleY(0.85f+r*0.15f);
-            }
+        compositePageTransformer.addTransformer((page, position) -> {
+            float r = Math.abs(position);
+            page.setScaleY(0.85f + r * 0.15f);
         });
 
         viewPager2.setPageTransformer(compositePageTransformer);
@@ -156,12 +177,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
-    private Runnable sliderRunnable = new Runnable() {
-        @Override
-        public void run() {
-            viewPager2.setCurrentItem(viewPager2.getCurrentItem()+1);
-        }
-    };
+
+    private Runnable sliderRunnable = () -> viewPager2.setCurrentItem(viewPager2.getCurrentItem() + 1);
 
     @Override
     protected void onPause() {
@@ -172,16 +189,15 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        sliderHander.postDelayed(sliderRunnable,2000);
+        sliderHander.postDelayed(sliderRunnable, 2000);
     }
 
     private void initView() {
         viewPager2 = findViewById(R.id.viewpagaSlider);
         recyclerViewShowingNow = findViewById(R.id.viewNow);
-        recyclerViewShowingNow.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL,false));
+        recyclerViewShowingNow.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         recyclerViewComingSoon = findViewById(R.id.viewComing);
-        recyclerViewComingSoon.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL,false));
-
+        recyclerViewComingSoon.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
     }
     private void replaceFragment(Fragment fragment) {
         getSupportFragmentManager().beginTransaction()
