@@ -15,8 +15,11 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 
@@ -27,6 +30,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.bookingticket.Adapters.MovieListAdapter;
+import com.example.bookingticket.Adapters.ResultAdapter;
 import com.example.bookingticket.Adapters.SliderAdapters;
 import com.example.bookingticket.Domain.Datum;
 import com.example.bookingticket.Domain.ListMovie;
@@ -47,7 +51,10 @@ public class MainActivity extends AppCompatActivity {
     private LinearLayout tabCinema;
     private LinearLayout tabHome;
     private LinearLayout tabAccount;
-
+    private EditText edtSearch;
+    private RecyclerView recyclerView;
+    private ResultAdapter resultAdapter;
+    private List<String> allItems;
     private FirebaseFirestore db;
     private CollectionReference moviesCollection;
 
@@ -102,6 +109,77 @@ public class MainActivity extends AppCompatActivity {
         banner();
         sendRequest();
         sendRequestComingSoon(); // Uncomment and implement if needed
+
+        // Initialize your items (replace this with your data)
+
+        // Add items to allItems...
+
+        // Initialize UI components
+        // Initialize UI components
+        edtSearch = findViewById(R.id.edtSearch);
+        recyclerView = findViewById(R.id.recyclerView);
+
+        // Initialize Firebase Firestore
+        db = FirebaseFirestore.getInstance();
+
+        // Set up RecyclerView
+        ResultAdapter resultAdapter1= new ResultAdapter(new ArrayList<>()); // Use ResultAdapter if that's the actual adapter you are using
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setAdapter(resultAdapter1);
+
+        // Set up TextWatcher for the search functionality
+        edtSearch.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int start, int before, int count) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int start, int before, int count) {
+                // Filter the movies based on the search text
+                loadMovies(charSequence.toString());
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+            }
+        });
+    }
+    private void loadMovies(String query) {
+        // Reference to the "films" collection
+        db.collection("films")
+                .whereGreaterThanOrEqualTo("title", query)
+                .whereLessThanOrEqualTo("title", query + "\uf8ff")
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        // List to store movies
+                        List<Datum> movies = new ArrayList<>();
+
+                        // Iterate through the documents in the collection
+                        for (QueryDocumentSnapshot document : task.getResult()) {
+                            // Convert each document to a Movie object
+                            Datum movie = document.toObject(Datum.class);
+                            movies.add(movie);
+                        }
+
+                        // Update the RecyclerView with the list of movies
+                        if(!movies.isEmpty())
+                         resultAdapter.updateList(movies);
+                    } else {
+                        // Handle errors
+                        // Log.e(TAG, "Error getting documents: ", task.getException());
+                    }
+                });
+    }
+    private List<String> filterItems(String query) {
+        List<String> filteredList = new ArrayList<>();
+        for (String item : allItems) {
+            // Implement your filtering logic here
+            if (item.toLowerCase().contains(query.toLowerCase())) {
+                filteredList.add(item);
+            }
+        }
+        return filteredList;
     }
 
     private void sendRequest() {

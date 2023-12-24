@@ -30,6 +30,12 @@
                 android:padding="12dp"
                 android:hint="Search"
                 android:textColorHint="@color/white"/>
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@id/edtSearch"
+                android:layout_marginTop="8dp"/>
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="200dp">
