@@ -1,6 +1,10 @@
 package com.example.bookingticket.Activities;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.text.TextUtils;
+import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
@@ -14,6 +18,7 @@ import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
 import com.example.bookingticket.Domain.Datum;
 import com.example.bookingticket.R;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -27,136 +32,87 @@ public class DetailActivity extends AppCompatActivity {
     private ImageView imageView;
     private TextView titleTextView;
     private TextView descriptionTextView;
+    private TextView showDuration;
+    private TextView showRating;
+    private TextView showReleasedDate;
+    private TextView showCountry;
+    private TextView showGenres;
+    private TextView showDirector;
+    private TextView showActor;
+    private Button buttonBooking;
 
-    private RequestQueue requestQueue;
+    private FirebaseFirestore db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
 
-        imageView = findViewById(R.id.imageView4);
-        titleTextView = findViewById(R.id.textView);
-        descriptionTextView = findViewById(R.id.textView11);
-        int movieId = getIntent().getIntExtra("id", -1);
-        // Initialize Volley RequestQueue
-        requestQueue = Volley.newRequestQueue(this);
+        imageView = findViewById(R.id.showImage);
+        titleTextView = findViewById(R.id.showFilmName);
+        descriptionTextView = findViewById(R.id.showPlot);
+        showDuration = findViewById(R.id.showDuration);
+        showRating = findViewById(R.id.showRating);
+        showReleasedDate = findViewById(R.id.showReleasedDate);
+        showCountry = findViewById(R.id.showCountry);
+        showGenres = findViewById(R.id.showGenres);
+        showDirector = findViewById(R.id.showDirector);
+        showActor = findViewById(R.id.showActor);
+        buttonBooking = findViewById(R.id.btnBooking);
 
-        // Make the network request
-        String url = "https://moviesapi.ir/api/v1/movies/"+movieId;
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
-                Request.Method.GET,
-                url,
-                null,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        // Parse JSON response and update UI
-                        try {
-                            Datum datum = parseMovieDetails(response);
-                            updateUI(datum);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        // Handle network errors
-                    }
-                }
-        );
+        db = FirebaseFirestore.getInstance();
 
-        // Add the request to the RequestQueue
-        requestQueue.add(jsonObjectRequest);
-    }
-
-    private Datum parseMovieDetails(JSONObject jsonObject) throws JSONException {
-        int id = jsonObject.getInt("id");
-        String title = jsonObject.getString("title");
-        String poster = jsonObject.getString("poster");
-        String year = jsonObject.getString("year");
-        String rated = jsonObject.getString("rated");
-        String released = jsonObject.getString("released");
-        String runtime = jsonObject.getString("runtime");
-        String director = jsonObject.getString("director");
-        String writer = jsonObject.getString("writer");
-        String actors = jsonObject.getString("actors");
-        String plot = jsonObject.getString("plot");
-        String country = jsonObject.getString("country");
-        String awards = jsonObject.getString("awards");
-        String metascore = jsonObject.getString("metascore");
-        String imdbRating = jsonObject.getString("imdb_rating");
-        String imdbVotes = jsonObject.getString("imdb_votes");
-        String imdbId = jsonObject.getString("imdb_id");
-        String type = jsonObject.getString("type");
-
-        // Parse genres array
-        List<String> genres = new ArrayList<>();
-        JSONArray genresArray = jsonObject.getJSONArray("genres");
-        for (int i = 0; i < genresArray.length(); i++) {
-            genres.add(genresArray.getString(i));
-        }
-
-        // Parse images array
-        List<String> images = new ArrayList<>();
-        JSONArray imagesArray = jsonObject.getJSONArray("images");
-        for (int i = 0; i < imagesArray.length(); i++) {
-            images.add(imagesArray.getString(i));
-        }
-
-        // Create and return Datum object
-        return new Datum(id, title, poster, year, rated, released, runtime, director,
-                writer, actors, plot, country, awards, metascore, imdbRating, imdbVotes,
-                imdbId, type, genres, images);
-    }
-
-    private void updateUI(Datum datum) {
-        // Use a library like Volley's ImageLoader to load the image into ImageView
-        ImageLoader imageLoader = new ImageLoader(requestQueue, new ImageLoader.ImageCache() {
+        buttonBooking.setOnClickListener(new View.OnClickListener() {
             @Override
-            public Bitmap getBitmap(String url) {
-                return null;
-            }
-
-            @Override
-            public void putBitmap(String url, Bitmap bitmap) {
-                // Optional: Implement caching if needed
+            public void onClick(View v) {
+                Intent intent = new Intent(DetailActivity.this, BookingActivity.class);
+                intent.putExtra("id", getIntent().getStringExtra("id"));
+                startActivity(intent);
             }
         });
 
-//        ImageLoader.ImageListener imageListener = ImageLoader.getImageListener(
-//                imageView,
-//                R.drawable.placeholder_image, // Placeholder image resource
-//                R.drawable.error_image); // Error image resource
-//
-//        imageLoader.get("URL_FOR_YOUR_IMAGE", imageListener);
+        String movieId = getIntent().getStringExtra("id");
 
-        // Set title and description
+        fetchMovieDetails(movieId);
+    }
+
+    private void fetchMovieDetails(String movieId) {
+        db.collection("films").document(movieId)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        Datum datum = documentSnapshot.toObject(Datum.class);
+                        updateUI(datum);
+                    } else {
+                        // Handle the case where the document doesn't exist
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    // Handle errors while fetching data
+                });
+    }
+
+    private void updateUI(Datum datum) {
         titleTextView.setText(datum.getTitle());
         descriptionTextView.setText(datum.getPlot());
+        showDuration.setText(datum.getRuntime());
+        showRating.setText(datum.getImdbRating());
+        showReleasedDate.setText(datum.getReleased());
+        showCountry.setText(datum.getCountry());
 
-        List<String> images = datum.getImages();
-//        if (images != null && !images.isEmpty()) {
-//            // Assuming you have an ImageView for each additional image
-//            ImageView additionalImageView1 = findViewById(R.id.imageView2);
-//            ImageView additionalImageView2 = findViewById(R.id.imageView3);
-//            Glide.with(this)
-//                    .load(images.get(2))  // Assuming getPoster() returns the image URL
-//                    .into(imageView);
-//            // Load the first additional image
-//            Glide.with(this)
-//                    .load(images.get(0))
-//                    .into(additionalImageView1);
-//
-//            // Load the second additional image
-//            Glide.with(this)
-//                    .load(images.get(1))
-//                    .into(additionalImageView2);
-//
-//            // Add more ImageViews and load more images as needed
-//        }
+        // Convert the list of genres to a comma-separated string
+        String genresString = String.join(", ", datum.getGenres());
+        showGenres.setText(genresString);
+
+        showDirector.setText(datum.getDirector());
+        showActor.setText(datum.getActors());
+
+        // Assuming you have an ImageView for each additional image
+        if (!datum.getImages().isEmpty()) {
+            Glide.with(this)
+                    .load(datum.getImages().get(0))  // Assuming getImages() returns a list of image URLs
+                    .into(imageView);
+        }
     }
 }
 
