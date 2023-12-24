@@ -6,4 +6,6 @@
     <color name="orange">#ff7427</color>
     <color name="yellow">#FFC107</color>
     <color name="dark_blue">#252836</color>
+    <color name="modifiedblack">#E4000000</color>
+    <color name="custom">#F3000000</color>
 </resources>

@@ -2,4 +2,5 @@
 <resources>
     <drawable name="occupied_seat_background" />
     <drawable name="available_seat_background" />
+
 </resources>
