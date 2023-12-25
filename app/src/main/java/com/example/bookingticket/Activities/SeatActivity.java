@@ -24,6 +24,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.bookingticket.Activities.MainActivity;
 import com.example.bookingticket.R;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -36,6 +38,7 @@ import java.util.List;
 public class SeatActivity extends AppCompatActivity implements View.OnClickListener {
 
     ViewGroup groupLayout;
+    List<Integer> seatArray=new ArrayList<>();
     Button bookTicketsBttn;
     boolean Success = true;
     static String bookingError = "";
@@ -54,7 +57,9 @@ public class SeatActivity extends AppCompatActivity implements View.OnClickListe
 
     List<TextView> seatViewList = new ArrayList<>();
     List<Integer> reservedSeats = new ArrayList<>();
-    int seatSize = 90, seatGaping = 10, chosenSeats = 10, count = 0;
+     private Intent intent = getIntent();
+
+    int seatSize = 90, seatGaping = 10, chosenSeats = 0, count = 0;
     int STATUS_AVAILABLE = 1, STATUS_BOOKED = 2, audiID=0, movieID=0, screening_id;
     private String time = "", selectedIds = "", costumerName = "", costumerEmail = "", costumerPhone = "", movieTitle = "";
 
@@ -63,9 +68,10 @@ public class SeatActivity extends AppCompatActivity implements View.OnClickListe
     @SuppressLint({"MissingInflatedId"})
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Intent intent = getIntent();
+         Intent intent = getIntent();
+
         audiID = intent.getIntExtra("audiID", 0);
-        movieID = intent.getIntExtra("movieID", 0);
+        movieID = intent.getIntExtra("id", 0);
         time = intent.getStringExtra("time");
         costumerName = intent.getStringExtra("name");
         costumerEmail = intent.getStringExtra("email");
@@ -73,8 +79,6 @@ public class SeatActivity extends AppCompatActivity implements View.OnClickListe
         movieTitle = intent.getStringExtra("title");
         chosenSeats = intent.getIntExtra("number of seats", 0);
 
-        new Task1(1).execute();
-        new Task1(2).execute();
 
         setContentView(R.layout.seat_activity);
 //        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -167,67 +171,31 @@ public class SeatActivity extends AppCompatActivity implements View.OnClickListe
         bookTicketsBttn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(chosenSeats < 0){
+                if(chosenSeats <= 0){
                     Toast.makeText(SeatActivity.this,"More seats have been selected!!", Toast.LENGTH_LONG).show();
                 }
-                else if(chosenSeats > 0){
-                    Toast.makeText(SeatActivity.this,"Fewer seats have been selected!!", Toast.LENGTH_LONG).show();
-                }
+//                else if(chosenSeats > 0){
+//                    Toast.makeText(SeatActivity.this,"Fewer seats have been selected!!", Toast.LENGTH_LONG).show();
+//                }
                 else{
                     String[] seatsToBook = selectedIds.split(",");
-                    new Task1(3, seatsToBook).execute();
 
-                    try {
-                        Thread.sleep(500);
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
 
-                    if(bookingError.isEmpty()) {
-                        /*A thread for sending a message to prevent running the sendMessage() method from the main thread.
-                         * Also for displaying a message after a successful booking.*/
-                        Thread thread = new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                                    if (checkSelfPermission(Manifest.permission.SEND_SMS) == PackageManager.PERMISSION_GRANTED) {
-                                        sendMessage();
-                                        try {
-                                            Thread.sleep(5000);
-                                        } catch (InterruptedException e) {
-                                            throw new RuntimeException(e);
-                                        }
 
-                                        alertDialog.dismiss();
-
-                                        try {
-                                            Thread.sleep(100);
-                                        } catch (InterruptedException e) {
-                                            throw new RuntimeException(e);
-                                        }
-
-                                        /*After booking the tickets and displaying the message
-                                         * We finish this activity and back to the main activity.*/
-                                        Intent intent = new Intent(SeatActivity.this, MainActivity.class);
-                                        startActivity(intent);
-                                        finish();
-                                    }
-                                    else {
-                                        requestPermissions(new String[]{Manifest.permission.SEND_SMS}, 1);
-                                    }
-                                }
-                            }
-                        });
-                        thread.start();
-                    }
-                    else{
 
                         /*After failing to book the tickets and displaying the error message
                          * We finish this activity and back to the main activity.*/
-                        Intent intent = new Intent(SeatActivity.this, MainActivity.class);
-                        startActivity(intent);
+                        Intent intent1 = new Intent(SeatActivity.this, TicketActivity.class);
+                    Intent intent = getIntent();
+                    intent1.putExtra("seat",seatArray.toString());
+                    intent1.putExtra("cinema", intent.getStringExtra("cinema"));
+                    intent1.putExtra("time", intent.getStringExtra("time"));
+                    intent1.putExtra("date", intent.getStringExtra("date"));
+                    intent1.putExtra("title", intent.getStringExtra("title"));
+                    intent1.putExtra("image", intent.getStringExtra("image"));
+                        startActivity(intent1);
                         finish();
-                    }
+
                 }
             }
         });
@@ -244,11 +212,21 @@ public class SeatActivity extends AppCompatActivity implements View.OnClickListe
             if (selectedIds.contains(view.getId() + ",")) {
                 selectedIds = selectedIds.replace(+view.getId() + ",", "");
                 view.setBackgroundResource(R.drawable.ic_seats_book);
-                chosenSeats++;
+                chosenSeats--;
+               for (int i=0;i<seatArray.size();i++){
+                   if(seatArray.get(i)==view.getId()){
+                       seatArray.remove(i);
+                       break;
+
+                   }
+               }
+
             } else {
                 selectedIds = selectedIds + view.getId() + ",";
                 view.setBackgroundResource(R.drawable.ic_seats_selected);
-                chosenSeats--;
+                chosenSeats++;
+                seatArray.add(view.getId());
+
             }
         } else if ((int) view.getTag() == STATUS_BOOKED) {
             Toast.makeText(this, "Seat " + view.getId() + " is Booked", Toast.LENGTH_SHORT).show();
@@ -276,6 +254,7 @@ public class SeatActivity extends AppCompatActivity implements View.OnClickListe
     public void buildSeats(List<Integer> tmp) {
         int fac = audiID == 1 ? 0 : (audiID-1)*60;
         int cnt = 0;
+
         for(int i = 0; i < seats.length(); i++){
             if(seats.charAt(i) == 'U' || seats.charAt(i) == 'A'){
                 cnt++;
@@ -328,117 +307,40 @@ public class SeatActivity extends AppCompatActivity implements View.OnClickListe
             });
         }
     }
+    private void getSeatId(String filmId, List<Integer> seatArray) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
 
+        db.collection("showing")
+                .whereEqualTo("filmId", filmId)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
+                        // Assuming "seatBooked" is the array field you want to retrieve
+                        List<Long> seatBookedList = (List<Long>) document.get("seatBooked");
+
+                        if (seatBookedList != null) {
+                            // Check if any seatId in seatBookedList is present in the seatArray
+                            for (Long seatId : seatBookedList) {
+                                if (seatArray.contains(seatId.intValue())) {
+                                    // SeatId is present in the array
+                                    // You can perform further actions here
+                                    // For example, you might want to update UI or perform some logic
+                                    // based on the seatId
+                                }
+                            }
+                        }
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    // Handle errors while fetching data
+                });
+    }
     /*This inner class have three modes:
      * mode == 1, To retrieve the appropriate screening id.
      * mode == 2, To retrieve the reserved seats of the specific screening id.
      * mode == 3, To update the reservation and seats_reserved tables after a successful booking.*/
-    class Task1 extends AsyncTask<Void, Void, Void> {
-
-        String error = "";
-        String[] seatsToBook;
-        int mode = 0;
-
-        public Task1(int mode) {
-            this.mode = mode;
-        }
-
-        public Task1(int mode, String[] seatsToBook) {
-            this.mode = mode;
-            this.seatsToBook = seatsToBook;
-        }
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-            if(mode == 1){
-                try {
-                    Class.forName("com.mysql.jdbc.Driver");
-                    Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/ea6cinema_db", "andro", "andro");
-                    Statement statement1 = conn.createStatement();
-
-                    ResultSet resultSet = statement1.executeQuery("SELECT * FROM `ea6cinema_db`.`screening` " +
-                            "where movie_id = '"+movieID+"' AND audit_id =" +
-                            " '"+audiID+"' AND screening_time = '"+time+"'");
-
-                    if(resultSet.next()){
-                        screening_id = resultSet.getInt("id");
-                    }
-                    statement1.close();
-                    conn.close();
-                }
-                catch(Exception e) {
-                    error = e.toString();
-                }
-            }
-            else if(mode == 2){
-                try {
-                    Class.forName("com.mysql.jdbc.Driver");
-                    Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/ea6cinema_db", "andro", "andro");
-                    Statement statement1 = conn.createStatement();
-
-                    ResultSet resultSet = statement1.executeQuery("SELECT * FROM `ea6cinema_db`.`seat_reserved` " +
-                            "where screening_id = '"+screening_id+"' ");
-
-                    while(resultSet.next()){
-                        reservedSeats.add(resultSet.getInt("seat_id"));
-                    }
-
-                    statement1.close();
-                    conn.close();
-                }
-                catch(Exception e) {
-                    error = e.toString();
-                }
-            }
-            else if(mode == 3){
-                try {
-                    Class.forName("com.mysql.jdbc.Driver");
-                    Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/ea6cinema_db", "andro", "andro");
-                    Statement statement1 = conn.createStatement();
-                    Statement statement2 = conn.createStatement();
-                    ResultSet resultSet = statement1.executeQuery("SELECT * FROM `ea6cinema_db`.`reservation`");
-
-                    int resID = 1;
-                    while(resultSet.next()){
-                        resID++;
-                    }
-                    statement2.executeUpdate("INSERT INTO `ea6cinema_db`.`reservation` " +
-                            "(`id`, `screening_id`, `name`, `email`, `phone`) VALUES " +
-                            "('" + resID + "','" + screening_id + "','" + costumerName + "','"
-                            + costumerEmail + "', '" + costumerPhone + "')");
 
 
-                    resultSet = statement1.executeQuery("SELECT * FROM `ea6cinema_db`.`seat_reserved`");
-                    int id = 1;
-                    while(resultSet.next()){
-                        id++;
-                    }
-                    for(int i = 0; i < seatsToBook.length; i++){
-                        int seat = Integer.parseInt(seatsToBook[i]);
-                        seat = seat + ((audiID-1)*60);
-                        statement2.executeUpdate("INSERT INTO `ea6cinema_db`.`seat_reserved` " +
-                                "(`id`, `seat_id`, `reservation_id`, `screening_id`) VALUES " +
-                                "('" + id + "','" + seat + "','" + resID + "','" + screening_id + "')");
-                        id++;
-                    }
-                    statement1.close();
-                    conn.close();
-                }
-                catch(Exception e) {
-                    error = e.toString();
-                    SeatActivity.bookingError = error;
-                }
-            }
-            return null;
-        }
 
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            if(error != "") {
-                Toast.makeText(getApplicationContext(),
-                        "There is error with the booking, please try again later!", Toast.LENGTH_LONG).show();
-            }
-            super.onPostExecute(aVoid);
-        }
     }
-}
+

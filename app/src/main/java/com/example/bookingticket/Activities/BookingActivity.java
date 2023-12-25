@@ -35,6 +35,7 @@ public class BookingActivity extends AppCompatActivity {
     private Button btnContinue;
 
     private FirebaseFirestore db;
+    private String firstImageUrl;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -59,8 +60,18 @@ public class BookingActivity extends AppCompatActivity {
         btnContinue.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                String selectedCinema = spinnerCinema.getSelectedItem().toString();
+                String selectedTime = spinnerTime.getSelectedItem().toString();
+                String selectedDate = spinnerDate.getSelectedItem().toString();
+
                 Intent intent = new Intent(BookingActivity.this, SeatActivity.class);
+                intent.putExtra("cinema", selectedCinema);
+                intent.putExtra("time", selectedTime);
+                intent.putExtra("date", selectedDate);
+                intent.putExtra("title", titleTextView.getText());
+                intent.putExtra("image", firstImageUrl);
                 intent.putExtra("id", getIntent().getStringExtra("id"));
+
                 startActivity(intent);
             }
         });
@@ -170,6 +181,8 @@ public class BookingActivity extends AppCompatActivity {
     private void updateSpinnerCinema(List<String> timeOptions) {
         ArrayAdapter<String> timeAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, timeOptions);
         spinnerCinema.setAdapter(timeAdapter);
+
+
     }
     private void updateSpinnerDate(List<String> timeOptions) {
         ArrayAdapter<String> timeAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, timeOptions);
@@ -191,6 +204,8 @@ public class BookingActivity extends AppCompatActivity {
 
         // Assuming you have an ImageView for each additional image
         if (!datum.getImages().isEmpty()) {
+            firstImageUrl = datum.getImages().get(0);
+
             Glide.with(this)
                     .load(datum.getImages().get(0))  // Assuming getImages() returns a list of image URLs
                     .into(imageView);
