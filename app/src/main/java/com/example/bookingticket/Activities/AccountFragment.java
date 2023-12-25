@@ -36,7 +36,7 @@ public class AccountFragment extends Fragment {
     private TextView showEmail;
     private TextView showPhone;
     private TextView showName;
-
+    private TextView btnChange;
 
 
     // This is called when the fragment is created
@@ -60,12 +60,19 @@ public class AccountFragment extends Fragment {
         showAddress = view.findViewById(R.id.showAddress);
         showEmail=view.findViewById((R.id.showEmail));
         showPhone=view.findViewById((R.id.showPhone));
+        btnChange=view.findViewById(R.id.btnChange);
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(requireContext());
         String userUid = preferences.getString("userUid", "");
         String userName = preferences.getString("userName", "");
         String userEmail = preferences.getString("userEmail", "");
         showEmail.setText(userEmail);
-
+        btnChange.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(requireContext(), ChangeInfor.class);
+                startActivity(intent);
+            }
+        });
 
         // Set up Firebase Firestore
         FirebaseFirestore db = FirebaseFirestore.getInstance();

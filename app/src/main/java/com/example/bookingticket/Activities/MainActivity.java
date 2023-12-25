@@ -116,18 +116,23 @@ public class MainActivity extends AppCompatActivity {
 
         // Initialize UI components
         // Initialize UI components
+        // Initialize views
         edtSearch = findViewById(R.id.edtSearch);
         recyclerView = findViewById(R.id.recyclerView);
 
-        // Initialize Firebase Firestore
+// Initialize Firebase Firestore
         db = FirebaseFirestore.getInstance();
 
-        // Set up RecyclerView
-        ResultAdapter resultAdapter1= new ResultAdapter(new ArrayList<>()); // Use ResultAdapter if that's the actual adapter you are using
+// Initialize ResultAdapter and set it to the RecyclerView
+        resultAdapter = new ResultAdapter(new ArrayList<>());
+        resultAdapter.setOnItemClickListener(item -> {
+            // Handle item click, e.g., start DetailActivity
+            openDetailActivity(item);
+        });
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setAdapter(resultAdapter1);
+        recyclerView.setAdapter(resultAdapter);
 
-        // Set up TextWatcher for the search functionality
+// Set up TextWatcher for the search functionality
         edtSearch.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int start, int before, int count) {
@@ -144,32 +149,51 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+    private void openDetailActivity(Datum item) {
+        if (item != null) {
+            String itemId = item.getId();
+            if (itemId != null) {
+                Intent intent = new Intent(this, DetailActivity.class);
+                intent.putExtra("id", itemId);
+                startActivity(intent);
+            } else {
+                Log.e("Adapter", "Item id is null");
+            }
+        } else {
+            Log.e("Adapter", "Item is null");
+        }
+    }
+
     private void loadMovies(String query) {
-        // Reference to the "films" collection
-        db.collection("films")
-                .whereGreaterThanOrEqualTo("title", query)
-                .whereLessThanOrEqualTo("title", query + "\uf8ff")
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        // List to store movies
-                        List<Datum> movies = new ArrayList<>();
+        if (!query.isEmpty()) {
+            // Reference to the "films" collection
+            db.collection("films")
+                    .whereGreaterThanOrEqualTo("title", query)
+                    .whereLessThanOrEqualTo("title", query + "\uf8ff")
+                    .get()
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            // List to store movies
+                            List<Datum> movies = new ArrayList<>();
 
-                        // Iterate through the documents in the collection
-                        for (QueryDocumentSnapshot document : task.getResult()) {
-                            // Convert each document to a Movie object
-                            Datum movie = document.toObject(Datum.class);
-                            movies.add(movie);
+                            // Iterate through the documents in the collection
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                String documentId = document.getId();
+
+                                // Convert each document to a Movie object
+                                Datum movie = document.toObject(Datum.class);
+                                movie.setId(documentId);
+                                movies.add(movie);
+                            }
+
+                            // Update the RecyclerView with the list of movies
+                            resultAdapter.updateList(movies);
+                        } else {
+                            // Handle errors
+                            // Log.e(TAG, "Error getting documents: ", task.getException());
                         }
-
-                        // Update the RecyclerView with the list of movies
-                        if(!movies.isEmpty())
-                         resultAdapter.updateList(movies);
-                    } else {
-                        // Handle errors
-                        // Log.e(TAG, "Error getting documents: ", task.getException());
-                    }
-                });
+                    });
+        }
     }
     private List<String> filterItems(String query) {
         List<String> filteredList = new ArrayList<>();

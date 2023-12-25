@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_gravity="center"
+        android:padding="16dp">
+
+        <ImageView
+            android:id="@+id/imageViewMovie"
+            android:layout_width="match_parent"
+            app:srcCompat="@drawable/movie_detail"
+            android:layout_height="200dp"
+            android:scaleType="centerCrop"
+            android:soundEffectsEnabled="false" />
+        <TextView
+            android:id="@+id/textViewMovieTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Tên Phim"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginTop="8dp"/>
+
+        <TextView
+            android:id="@+id/textViewCinema"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Rạp Phim"
+            android:layout_marginTop="4dp"/>
+
+        <TextView
+            android:id="@+id/textViewShowTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Thời Gian: 00:00"
+            android:layout_marginTop="4dp"/>
+
+        <TextView
+            android:id="@+id/textViewShowDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Ngày Chiếu: DD/MM/YYYY"
+            android:layout_marginTop="4dp"/>
+
+        <TextView
+            android:id="@+id/textViewSeat"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Ghế: A1, A2"
+            android:layout_marginTop="4dp"/>
+
+        <TextView
+            android:id="@+id/textViewPrice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Giá Vé: 100,000 VND"
+            android:layout_marginTop="4dp"/>
+    </LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

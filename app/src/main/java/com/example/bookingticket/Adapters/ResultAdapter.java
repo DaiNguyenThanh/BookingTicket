@@ -1,5 +1,7 @@
 package com.example.bookingticket.Adapters;
 
+import android.content.Intent;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,6 +10,7 @@ import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide; // Make sure to include the necessary Glide dependency
+import com.example.bookingticket.Activities.DetailActivity;
 import com.example.bookingticket.Domain.Datum;
 import com.example.bookingticket.R;
 
@@ -15,10 +18,16 @@ import java.util.List;
 
 public class ResultAdapter extends RecyclerView.Adapter<ResultAdapter.ViewHolder> {
 
-    private List<Datum> items; // Replace Datum with the actual type of your items
+    private List<Datum> items;
+    private OnItemClickListener listener;
+
+    public interface OnItemClickListener {
+        void onItemClick(Datum item);
+    }
 
     public ResultAdapter(List<Datum> items) {
         this.items = items;
+
     }
 
     public void updateList(List<Datum> updatedItems) {
@@ -37,17 +46,22 @@ public class ResultAdapter extends RecyclerView.Adapter<ResultAdapter.ViewHolder
         Datum item = items.get(position);
         holder.textView.setText(item.getTitle());
 
-        // Load and display the first image from the array using Glide
         if (item.getImages() != null && item.getImages().size() > 0) {
             String firstImage = item.getImages().get(0);
             Glide.with(holder.itemView.getContext())
-                    .load(firstImage) // Assuming firstImage is a URL or resource identifier
-
+                    .load(firstImage)
                     .into(holder.imageView);
         } else {
             // Handle the case where there are no images
-            //holder.imageView.setImageResource(R.drawable.placeholder_image);
+            // holder.imageView.setImageResource(R.drawable.placeholder_image);
         }
+        holder.itemView.setOnClickListener(v -> {
+            if (listener != null && item != null) {
+                listener.onItemClick(item);
+            }
+        });
+
+
     }
 
     @Override
@@ -55,7 +69,7 @@ public class ResultAdapter extends RecyclerView.Adapter<ResultAdapter.ViewHolder
         return items.size();
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
+    public class ViewHolder extends RecyclerView.ViewHolder {
         public TextView textView;
         public ImageView imageView;
 
@@ -63,6 +77,17 @@ public class ResultAdapter extends RecyclerView.Adapter<ResultAdapter.ViewHolder
             super(view);
             textView = view.findViewById(R.id.textViewItemResult);
             imageView = view.findViewById(R.id.imageViewItemResult);
+
+            itemView.setOnClickListener(v -> {
+                int position = getAdapterPosition();
+                if (position != RecyclerView.NO_POSITION && listener != null) {
+                    listener.onItemClick(items.get(position));
+                }
+            });
         }
     }
+    public void setOnItemClickListener(OnItemClickListener listener) {
+        this.listener = listener;
+    }
+
 }

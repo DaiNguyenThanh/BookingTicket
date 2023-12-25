@@ -14,7 +14,13 @@
         android:theme="@style/Theme.BookingTicket"
         tools:targetApi="31">
         <activity
+            android:name=".Activities.ChangeInfor"
+            android:exported="false" />
+        <activity
             android:name=".Activities.SeatActivity"
+            android:exported="false" />
+        <activity
+            android:name=".Activities.TicketActivity"
             android:exported="false" />
 
         <activity
