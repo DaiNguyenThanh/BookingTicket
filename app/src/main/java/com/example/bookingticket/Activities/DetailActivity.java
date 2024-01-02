@@ -42,7 +42,7 @@ public class DetailActivity extends AppCompatActivity {
     private TextView showDirector;
     private TextView showActor;
     private Button buttonBooking;
-
+//    private ImageView Back;
     private FirebaseFirestore db;
 
     @Override
@@ -61,7 +61,13 @@ public class DetailActivity extends AppCompatActivity {
         showDirector = findViewById(R.id.showDirector);
         showActor = findViewById(R.id.showActor);
         buttonBooking = findViewById(R.id.btnBooking);
-
+        ImageView Back=findViewById(R.id.back);
+        Back.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
         db = FirebaseFirestore.getInstance();
 
         buttonBooking.setOnClickListener(new View.OnClickListener() {
