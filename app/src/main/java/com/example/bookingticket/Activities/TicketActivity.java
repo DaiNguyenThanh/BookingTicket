@@ -2,6 +2,7 @@ package com.example.bookingticket.Activities;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -26,7 +27,16 @@ public class TicketActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.ticket);
-
+        ImageView Back=findViewById(R.id.back);
+        Back.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(TicketActivity.this, MainActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+                TicketActivity.this.finish();
+            }
+        });
         imageViewMovie=findViewById(R.id.imageViewMovie);
         textViewMovieTitle=findViewById(R.id.textViewMovieTitle);
         textViewShowTime=findViewById(R.id.textViewShowTime);

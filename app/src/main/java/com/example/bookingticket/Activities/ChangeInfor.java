@@ -4,8 +4,11 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
+
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.bookingticket.R;
@@ -31,7 +34,13 @@ public class ChangeInfor extends AppCompatActivity {
 
         textName = findViewById(R.id.showName);
         mobile = findViewById(R.id.showPhone);
-
+        ImageView Back=findViewById(R.id.back);
+        Back.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
         address = findViewById(R.id.showAddress);
         btChange = findViewById(R.id.btChange);
 

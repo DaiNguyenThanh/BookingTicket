@@ -54,7 +54,13 @@ public class BookingActivity extends AppCompatActivity {
         imageView = findViewById(R.id.showImage);
         titleTextView = findViewById(R.id.showFilmName);
         db = FirebaseFirestore.getInstance();
-
+        ImageView Back=findViewById(R.id.back);
+        Back.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
         showDuration = findViewById(R.id.showDuration);
         showRating = findViewById(R.id.showRating);
         spinnerTime = findViewById(R.id.spinnerTime);

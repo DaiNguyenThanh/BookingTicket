@@ -22,6 +22,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -81,6 +82,8 @@ public class SeatActivity extends AppCompatActivity implements View.OnClickListe
     @SuppressLint({"MissingInflatedId"})
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.seat_activity);
+        
          Intent intent = getIntent();
 
         audiID = intent.getIntExtra("audiID", 0);
@@ -92,8 +95,13 @@ public class SeatActivity extends AppCompatActivity implements View.OnClickListe
         movieTitle = intent.getStringExtra("title");
         chosenSeats = intent.getIntExtra("number of seats", 0);
 
-
-        setContentView(R.layout.seat_activity);
+        ImageView Back=findViewById(R.id.back);
+        Back.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
 //        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 //        getSupportActionBar().setTitle("Select seats");
         bookTicketsBttn = findViewById(R.id.bookTicketsBttn);
