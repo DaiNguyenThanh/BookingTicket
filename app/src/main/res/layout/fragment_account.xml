@@ -34,6 +34,7 @@
                     tools:layout_editor_absoluteY="16dp" />
 
                 <ImageView
+                    android:id="@+id/btnHistory"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:paddingEnd="10dp"

@@ -3,11 +3,13 @@ package com.example.bookingticket.Activities;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -15,13 +17,18 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.bumptech.glide.Glide;
 import com.example.bookingticket.Domain.Datum;
 import com.example.bookingticket.R;
+import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.TaskCompletionSource;
+import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class BookingActivity extends AppCompatActivity {
     private ImageView imageView;
@@ -32,10 +39,13 @@ public class BookingActivity extends AppCompatActivity {
     private Spinner spinnerTime;
     private Spinner spinnerDate;
     private Spinner spinnerCinema;
+    private Spinner spinnerShowingID;
+
     private Button btnContinue;
 
     private FirebaseFirestore db;
     private String firstImageUrl;
+    private String showingId;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -49,32 +59,124 @@ public class BookingActivity extends AppCompatActivity {
         showRating = findViewById(R.id.showRating);
         spinnerTime = findViewById(R.id.spinnerTime);
         spinnerDate = findViewById(R.id.spinnerDate);
+        spinnerShowingID = findViewById(R.id.spinnerShowingid);
+
+
         btnContinue=findViewById(R.id.btnContinue);
         spinnerCinema = findViewById(R.id.spinnerCinema);
-
         String movieId = getIntent().getStringExtra("id");
-        fetchMovieDetails(movieId);
-        fetchShowing(movieId);
-        fetchDate(movieId);
         fetchCinema(movieId);
+
+        spinnerCinema.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+                String selectedCinema = spinnerCinema.getSelectedItem().toString();
+                fetchShowingTimeAndDate(movieId, spinnerCinema.getSelectedItem().toString());
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parentView) {
+                // Do nothing here, or handle as needed
+            }
+        });
+        fetchMovieDetails(movieId);
+//        fetchShowing(movieId);
+//        fetchDate(movieId);
         btnContinue.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String selectedCinema = spinnerCinema.getSelectedItem().toString();
-                String selectedTime = spinnerTime.getSelectedItem().toString();
-                String selectedDate = spinnerDate.getSelectedItem().toString();
+                try {
+                    String selectedCinema = spinnerCinema.getSelectedItem().toString();
+                    String selectedTime = spinnerTime.getSelectedItem().toString();
+                    String selectedDate = spinnerDate.getSelectedItem().toString();
+                    String selectedshowingID = spinnerShowingID.getSelectedItem().toString();
 
-                Intent intent = new Intent(BookingActivity.this, SeatActivity.class);
-                intent.putExtra("cinema", selectedCinema);
-                intent.putExtra("time", selectedTime);
-                intent.putExtra("date", selectedDate);
-                intent.putExtra("title", titleTextView.getText());
-                intent.putExtra("image", firstImageUrl);
-                intent.putExtra("id", getIntent().getStringExtra("id"));
+                    if(!selectedCinema.isEmpty()&&!selectedTime.isEmpty()&&!selectedDate.isEmpty()) {
 
-                startActivity(intent);
+                        Intent intent = new Intent(BookingActivity.this, SeatActivity.class);
+                        intent.putExtra("cinema", selectedCinema);
+                        intent.putExtra("time", selectedTime);
+                        intent.putExtra("date", selectedDate);
+                        intent.putExtra("title", titleTextView.getText());
+                        intent.putExtra("image", firstImageUrl);
+                        intent.putExtra("id", getIntent().getStringExtra("id"));
+                        intent.putExtra("showingId", selectedshowingID);
+
+                        startActivity(intent);
+                    }
+                    else {
+                        Toast.makeText(BookingActivity.this, "Please select cinema, time, and date", Toast.LENGTH_SHORT).show();
+                    }
+                }
+                catch (Exception e){
+                    Toast.makeText(BookingActivity.this, "Not have Showing, PLease try later", Toast.LENGTH_SHORT).show();
+
+                }
+
             }
         });
+    }
+
+    private void fetchShowingTimeAndDate(String movieId, String selectedCinema) {
+        // Query to fetch cinema document based on the selected cinema name
+        db.collection("stores")
+                .whereEqualTo("title", selectedCinema)
+                .get()
+                .addOnSuccessListener(cinemaQuerySnapshot -> {
+                    if (!cinemaQuerySnapshot.isEmpty()) {
+                        // Assuming there's only one document with the given name
+                        String cinemaId = cinemaQuerySnapshot.getDocuments().get(0).getId();
+
+                        // Query the showing documents using the cinema ID
+                        db.collection("showing")
+                                .whereEqualTo("filmId", movieId)
+                                .whereArrayContains("stores", cinemaId)
+                                .get()
+                                .addOnSuccessListener(queryDocumentSnapshots -> {
+                                    List<String> timeOptions = new ArrayList<>();
+                                    List<String> dateOptions = new ArrayList<>();
+                                    List<String> showingIds = new ArrayList<>(); // List to store showing IDs
+
+                                    for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
+                                        String time = document.getString("time");
+                                        Date date = document.getDate("date");
+                                        String showingId = document.getId(); // Get the showing ID
+
+                                        if (time != null && !timeOptions.contains(time)) {
+                                            timeOptions.add(time);
+                                        }
+
+                                        if (date != null) {
+                                            String formattedDate = formatDate(date);
+                                            if (!dateOptions.contains(formattedDate)) {
+                                                dateOptions.add(formattedDate);
+                                            }
+                                        }
+
+                                        if (!showingIds.contains(showingId)) {
+                                            showingIds.add(showingId);
+                                        }
+                                    }
+
+                                    updateSpinnerTime(timeOptions);
+                                    updateSpinnerDate(dateOptions);
+                                    updateSpinnerShowingId(showingIds); // Update the Spinner for showing IDs
+                                })
+                                .addOnFailureListener(e -> {
+                                    // Handle errors while fetching data
+                                });
+                    } else {
+                        // Handle the case where the cinema document doesn't exist
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    // Handle errors while fetching cinema data
+                });
+    }
+    private void updateSpinnerShowingId(List<String> showingIds) {
+        ArrayAdapter<String> showingIdAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, showingIds);
+        Spinner spinnerShowingId = findViewById(R.id.spinnerShowingid);
+        spinnerShowingId.setAdapter(showingIdAdapter);
     }
     private void fetchMovieDetails(String movieId) {
         db.collection("films").document(movieId)
@@ -111,6 +213,8 @@ public class BookingActivity extends AppCompatActivity {
                     // Handle errors while fetching data
                 });
     }
+    private Map<String, String> storeIdToNameMap = new HashMap<>();
+
     private void fetchCinema(String movieId) {
         db.collection("showing")
                 .whereEqualTo("filmId", movieId)
@@ -134,27 +238,53 @@ public class BookingActivity extends AppCompatActivity {
     }
 
     private void fetchStoreNames(List<String> storeIds) {
-        List<String> storeNames = new ArrayList<>();
+        List<Task<String>> tasks = new ArrayList<>();
 
         for (String storeId : storeIds) {
-            db.collection("stores")
-                    .document(storeId)
-                    .get()
-                    .addOnSuccessListener(documentSnapshot -> {
-                        if (documentSnapshot.exists()) {
-                            String storeName = documentSnapshot.getString("title");
-                            if (storeName != null) {
-                                storeNames.add(storeName);
-                                updateSpinnerCinema(storeNames);
-                            }
-                        } else {
-                            // Handle the case where the store document doesn't exist
-                        }
-                    })
-                    .addOnFailureListener(e -> {
-                        // Handle errors while fetching store names
-                    });
+            Task<String> storeNameTask = fetchStoreName(storeId);
+            tasks.add(storeNameTask);
         }
+
+        Tasks.whenAllSuccess(tasks)
+                .addOnSuccessListener(storeNames -> {
+                    // All tasks completed successfully
+                    List<String> storeNamesList = new ArrayList<>();
+                    for (Object storeName : storeNames) {
+                        if (storeName instanceof String) {
+                            storeNamesList.add((String) storeName);
+                        }
+                    }
+                    updateSpinnerCinema(storeNamesList);
+                })
+                .addOnFailureListener(e -> {
+                    // Handle errors while fetching store names
+                });
+    }
+
+    private Task<String> fetchStoreName(String storeId) {
+        final TaskCompletionSource<String> tcs = new TaskCompletionSource<>();
+
+        db.collection("stores")
+                .document(storeId)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        String storeName = documentSnapshot.getString("title");
+                        if (storeName != null) {
+                            storeIdToNameMap.put(storeId, storeName);
+                            tcs.setResult(storeName);
+                        }
+                    } else {
+                        // Handle the case where the store document doesn't exist
+                        tcs.setException(new Exception("Store document doesn't exist"));
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    // Handle errors while fetching store names
+                    tcs.setException(e);
+                });
+
+        return tcs.getTask();
     }
     private void fetchDate(String movieId){
         db.collection("showing") // Replace "your_collection_name" with the actual name of your collection
