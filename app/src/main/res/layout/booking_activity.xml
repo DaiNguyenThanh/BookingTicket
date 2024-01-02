@@ -87,28 +87,20 @@
                 android:layout_marginEnd="20dp"
                 android:orientation="vertical">
 
-                <TextView
-                    android:id="@+id/textView"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:paddingStart="10dp"
-                    android:text="Date"
-                    android:textColor="#FFFFFF"
-                    android:textSize="22sp" />
 
                 <Spinner
-                    android:id="@+id/spinnerDate"
+                    android:id="@+id/spinnerShowingid"
                     android:layout_width="364dp"
                     android:layout_height="45dp"
                     android:layout_gravity="center"
-                    android:layout_marginStart="20dp"
-                    android:layout_marginEnd="20dp"
-                    android:layout_weight="1"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="10dp"
                     android:paddingStart="20dp"
+                    android:visibility="gone"
+                    android:layout_weight="1"
                     android:background="@android:drawable/btn_dropdown"
                     android:entries="@array/time_options"
                     android:padding="8dp" />
-
                 <TextView
                     android:id="@+id/textView2"
                     android:layout_width="match_parent"
@@ -131,6 +123,30 @@
                     android:background="@android:drawable/btn_dropdown"
                     android:entries="@array/time_options"
                     android:padding="8dp" />
+
+                <TextView
+                    android:id="@+id/textView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingStart="10dp"
+                    android:text="Date"
+                    android:textColor="#FFFFFF"
+                    android:textSize="22sp" />
+
+                <Spinner
+                    android:id="@+id/spinnerDate"
+                    android:layout_width="364dp"
+                    android:layout_height="45dp"
+                    android:layout_gravity="center"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginEnd="20dp"
+                    android:layout_weight="1"
+                    android:paddingStart="20dp"
+                    android:background="@android:drawable/btn_dropdown"
+                    android:entries="@array/time_options"
+                    android:padding="8dp" />
+
+
 
                 <TextView
                     android:id="@+id/textView3"

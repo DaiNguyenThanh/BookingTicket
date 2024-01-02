@@ -1,15 +1,21 @@
 package com.example.bookingticket.Activities;
 
+import static android.content.ContentValues.TAG;
+
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.telephony.SmsManager;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.MenuItem;
@@ -19,11 +25,16 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.bookingticket.Activities.MainActivity;
 import com.example.bookingticket.R;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
@@ -32,7 +43,9 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /*This class purpose is to build the seats viewGroup and for booking the seats.*/
 public class SeatActivity extends AppCompatActivity implements View.OnClickListener {
@@ -59,7 +72,7 @@ public class SeatActivity extends AppCompatActivity implements View.OnClickListe
     List<Integer> reservedSeats = new ArrayList<>();
      private Intent intent = getIntent();
 
-    int seatSize = 90, seatGaping = 10, chosenSeats = 0, count = 0;
+    int seatSize = 80, seatGaping = 10, chosenSeats = 0, count = 0;
     int STATUS_AVAILABLE = 1, STATUS_BOOKED = 2, audiID=0, movieID=0, screening_id;
     private String time = "", selectedIds = "", costumerName = "", costumerEmail = "", costumerPhone = "", movieTitle = "";
 
@@ -177,22 +190,56 @@ public class SeatActivity extends AppCompatActivity implements View.OnClickListe
 //                else if(chosenSeats > 0){
 //                    Toast.makeText(SeatActivity.this,"Fewer seats have been selected!!", Toast.LENGTH_LONG).show();
 //                }
-                else{
-                    String[] seatsToBook = selectedIds.split(",");
+                else {
+                    //String[] seatsToBook = selectedIds.split(",");
+                    FirebaseFirestore db = FirebaseFirestore.getInstance();
+                    Intent intent1 = new Intent(SeatActivity.this, TicketActivity.class);
+                    Intent intent = getIntent();
+                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(SeatActivity.this);
+                    String userId = preferences.getString("userUid", "DEFAULT_USER_ID");
+
+// Create the ticket data map
+                    Map<String, Object> ticketData = new HashMap<>();
+                    ticketData.put("film", intent.getStringExtra("title"));
+                    ticketData.put("cinema", intent.getStringExtra("cinema"));
+                    ticketData.put("seatArray", seatArray); // Add the entire seatArray
+                    ticketData.put("userId", userId);
+                    ticketData.put("time", intent.getStringExtra("time"));
+                    ticketData.put("date", intent.getStringExtra("date"));
+                    ticketData.put("image", intent.getStringExtra("image"));
+                    ticketData.put("showing", intent.getStringExtra("showingId"));
+                    ticketData.put("price", 100000*seatArray.size());
 
 
-
+// Add the document to the "tickets" collection
+                    db.collection("tickets")
+                            .add(ticketData)
+                            .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                                @Override
+                                public void onSuccess(DocumentReference documentReference) {
+                                    // Document added successfully
+                                    intent1.putExtra("ticketId", documentReference.getId());
+                                    Log.d(TAG, "DocumentSnapshot added with ID: " + documentReference.getId());
+                                }
+                            })
+                            .addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    // Handle errors
+                                    Log.w(TAG, "Error adding document", e);
+                                }
+                            });
 
                         /*After failing to book the tickets and displaying the error message
                          * We finish this activity and back to the main activity.*/
-                        Intent intent1 = new Intent(SeatActivity.this, TicketActivity.class);
-                    Intent intent = getIntent();
+
                     intent1.putExtra("seat",seatArray.toString());
                     intent1.putExtra("cinema", intent.getStringExtra("cinema"));
                     intent1.putExtra("time", intent.getStringExtra("time"));
                     intent1.putExtra("date", intent.getStringExtra("date"));
                     intent1.putExtra("title", intent.getStringExtra("title"));
                     intent1.putExtra("image", intent.getStringExtra("image"));
+
                         startActivity(intent1);
                         finish();
 
@@ -217,10 +264,8 @@ public class SeatActivity extends AppCompatActivity implements View.OnClickListe
                    if(seatArray.get(i)==view.getId()){
                        seatArray.remove(i);
                        break;
-
                    }
                }
-
             } else {
                 selectedIds = selectedIds + view.getId() + ",";
                 view.setBackgroundResource(R.drawable.ic_seats_selected);

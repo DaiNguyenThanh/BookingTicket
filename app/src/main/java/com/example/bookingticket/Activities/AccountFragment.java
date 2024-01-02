@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -37,7 +38,7 @@ public class AccountFragment extends Fragment {
     private TextView showPhone;
     private TextView showName;
     private TextView btnChange;
-
+    private ImageView btnHistory;
 
     // This is called when the fragment is created
     @Override
@@ -61,6 +62,7 @@ public class AccountFragment extends Fragment {
         showEmail=view.findViewById((R.id.showEmail));
         showPhone=view.findViewById((R.id.showPhone));
         btnChange=view.findViewById(R.id.btnChange);
+        btnHistory=view.findViewById(R.id.btnHistory);
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(requireContext());
         String userUid = preferences.getString("userUid", "");
         String userName = preferences.getString("userName", "");
@@ -73,7 +75,13 @@ public class AccountFragment extends Fragment {
                 startActivity(intent);
             }
         });
-
+        btnHistory.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(requireContext(), HistoryActivity.class);
+                startActivity(intent);
+            }
+        });
         // Set up Firebase Firestore
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         DocumentReference userDocRef = db.collection("users").document(userUid);
