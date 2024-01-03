@@ -91,30 +91,24 @@ public class RegisterActivity extends AppCompatActivity {
                             // Sign up success, update UI
                             Log.d("SignUpActivity", "createUserWithEmail:success");
 
-                            // Get the newly created user
                             FirebaseUser user = mAuth.getCurrentUser();
 
-                            // Add additional user information to Firestore or Realtime Database
                             if (user != null) {
                                 addUserInfoToDatabase(user.getUid(), fullName, edtAddress, edtPhone);
                             }
 
-                            // Navigate to the main activity or perform other actions
                             Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
                             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                             startActivity(intent);
                             finish();
                         } else {
-                            // If sign up fails, display a message to the user.
                             Log.w("SignUpActivity", "createUserWithEmail:failure", task.getException());
-                            // Handle errors here
                         }
                     }
                 });
     }
 
     private void addUserInfoToDatabase(String userId, String fullName, String edtAddress, String edtPhone) {
-        // Example for Firestore
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         Map<String, Object> user = new HashMap<>();
         user.put("fullName", fullName);

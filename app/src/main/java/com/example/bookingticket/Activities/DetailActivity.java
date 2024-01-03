@@ -87,21 +87,15 @@ public class DetailActivity extends AppCompatActivity {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         boolean isLoggedIn = preferences.getBoolean("isLoggedIn", false);
 
-        // Update UI based on login state
         if (!isLoggedIn) {
             Intent intent = new Intent(DetailActivity.this, LoginActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
             DetailActivity.this.finish();
-            // User is not logged in
-            // btnSignIn.setVisibility(View.VISIBLE);  // Show the sign-in button
         } else {
             Intent intent = new Intent(DetailActivity.this, BookingActivity.class);
             intent.putExtra("id", getIntent().getStringExtra("id"));
             startActivity(intent);
-            // User is logged in
-            //btnSignIn.setVisibility(View.GONE);  // Hide the sign-in button
-            // Optionally, show user information or perform other actions for a logged-in user
         }
     }
     private void fetchMovieDetails(String movieId) {
@@ -112,11 +106,9 @@ public class DetailActivity extends AppCompatActivity {
                         Datum datum = documentSnapshot.toObject(Datum.class);
                         updateUI(datum);
                     } else {
-                        // Handle the case where the document doesn't exist
                     }
                 })
                 .addOnFailureListener(e -> {
-                    // Handle errors while fetching data
                 });
     }
 
@@ -128,17 +120,15 @@ public class DetailActivity extends AppCompatActivity {
         showReleasedDate.setText(datum.getReleased());
         showCountry.setText(datum.getCountry());
 
-        // Convert the list of genres to a comma-separated string
         String genresString = String.join(", ", datum.getGenres());
         showGenres.setText(genresString);
 
         showDirector.setText(datum.getDirector());
         showActor.setText(datum.getActors());
 
-        // Assuming you have an ImageView for each additional image
         if (!datum.getImages().isEmpty()) {
             Glide.with(this)
-                    .load(datum.getImages().get(0))  // Assuming getImages() returns a list of image URLs
+                    .load(datum.getImages().get(0))
                     .into(imageView);
         }
     }

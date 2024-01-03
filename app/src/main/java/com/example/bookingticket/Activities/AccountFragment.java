@@ -40,13 +40,10 @@ public class AccountFragment extends Fragment {
     private TextView btnChange;
     private ImageView btnHistory;
 
-    // This is called when the fragment is created
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_account, container, false);
 
-        // Any additional setup for your fragment can go here
 
         return view;
     }
@@ -82,11 +79,9 @@ public class AccountFragment extends Fragment {
                 startActivity(intent);
             }
         });
-        // Set up Firebase Firestore
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         DocumentReference userDocRef = db.collection("users").document(userUid);
 
-        // Retrieve additional user information from Firestore
         userDocRef.get()
                 .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                     @Override
@@ -113,7 +108,6 @@ public class AccountFragment extends Fragment {
                     }
                 });
 
-        // Set click listener for logout button
         btnLogOut.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -128,26 +122,18 @@ public class AccountFragment extends Fragment {
     }
 
     private void checkLoginState() {
-        // Use PreferenceManager for Fragments
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(requireContext());
         boolean isLoggedIn = preferences.getBoolean("isLoggedIn", false);
 
-        // Update UI based on login state
         if (!isLoggedIn) {
             Intent intent = new Intent(getActivity(), LoginActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
             getActivity().finish();
-            // User is not logged in
-           // btnSignIn.setVisibility(View.VISIBLE);  // Show the sign-in button
         } else {
-            // User is logged in
-            //btnSignIn.setVisibility(View.GONE);  // Hide the sign-in button
-            // Optionally, show user information or perform other actions for a logged-in user
         }
     }
     private void clearLoginState() {
-        // Clear the isLoggedIn state
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(requireContext());
         preferences.edit().putBoolean("isLoggedIn", false).apply();
     }

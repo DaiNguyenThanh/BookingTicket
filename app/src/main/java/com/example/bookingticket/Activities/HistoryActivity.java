@@ -43,11 +43,9 @@ public class HistoryActivity extends AppCompatActivity {
         recyclerView = findViewById(R.id.recyclerViewArea);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        // Assuming you have a TicketAdapter class for your RecyclerView
         ticketAdapter = new TicketAdapter();
         recyclerView.setAdapter(ticketAdapter);
 
-        // Replace "yourUserId" with the actual user ID
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(HistoryActivity.this);
         String userId = preferences.getString("userUid", "DEFAULT_USER_ID");
 
@@ -71,7 +69,6 @@ public class HistoryActivity extends AppCompatActivity {
                     ticketAdapter.setTicketList(ticketList);
                 })
                 .addOnFailureListener(e -> {
-                    // Handle failure
                 });
     }
 

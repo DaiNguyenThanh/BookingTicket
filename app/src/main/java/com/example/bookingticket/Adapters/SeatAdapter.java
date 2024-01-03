@@ -54,12 +54,9 @@ public class SeatAdapter extends BaseAdapter {
 
         holder.seatNumberTextView.setText(seat.getSeatNumber());
 
-        // Customize the appearance based on the seat's status (occupied or available)
         if (seat.isOccupied()) {
-            // Set a background color or other visual indication for an occupied seat
             view.setBackgroundResource(R.drawable.occupied_seat_background1);
         } else {
-            // Set a background color or other visual indication for an available seat
             view.setBackgroundResource(R.drawable.available_seat_background1);
         }
 

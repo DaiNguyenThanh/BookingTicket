@@ -36,18 +36,15 @@ public class CinemaFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_cinema, container, false);
 
-        // Initialize Firestore
         firestore = FirebaseFirestore.getInstance();
-        storesCollection = firestore.collection("stores"); // Replace with your actual collection name
+        storesCollection = firestore.collection("stores");
 
-        // Initialize RecyclerView and adapter
         recyclerView = view.findViewById(R.id.recyclerViewArea);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         storeList = new ArrayList<>();
         storeAdapter = new StoreAdapter(storeList);
         recyclerView.setAdapter(storeAdapter);
 
-        // Fetch data from Firestore
         fetchDataFromFirestore();
 
         return view;
@@ -59,16 +56,13 @@ public class CinemaFragment extends Fragment {
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                 if (task.isSuccessful()) {
                     for (DocumentSnapshot document : task.getResult()) {
-                        // Convert each document to a Store object and add it to the list
                         Store store = document.toObject(Store.class);
                         if (store != null) {
                             storeList.add(store);
                         }
                     }
-                    // Notify the adapter that the data set has changed
                     storeAdapter.notifyDataSetChanged();
                 } else {
-                    // Handle errors
                     Toast.makeText(getActivity(), "Error fetching data from Firestore", Toast.LENGTH_SHORT).show();
                 }
             }

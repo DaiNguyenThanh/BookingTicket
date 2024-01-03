@@ -82,7 +82,6 @@ public class BookingActivity extends AppCompatActivity {
 
             @Override
             public void onNothingSelected(AdapterView<?> parentView) {
-                // Do nothing here, or handle as needed
             }
         });
         fetchMovieDetails(movieId);
@@ -166,17 +165,14 @@ public class BookingActivity extends AppCompatActivity {
 
                                     updateSpinnerTime(timeOptions);
                                     updateSpinnerDate(dateOptions);
-                                    updateSpinnerShowingId(showingIds); // Update the Spinner for showing IDs
+                                    updateSpinnerShowingId(showingIds);
                                 })
                                 .addOnFailureListener(e -> {
-                                    // Handle errors while fetching data
                                 });
                     } else {
-                        // Handle the case where the cinema document doesn't exist
                     }
                 })
                 .addOnFailureListener(e -> {
-                    // Handle errors while fetching cinema data
                 });
     }
     private void updateSpinnerShowingId(List<String> showingIds) {
@@ -192,15 +188,13 @@ public class BookingActivity extends AppCompatActivity {
                         Datum datum = documentSnapshot.toObject(Datum.class);
                         updateUI(datum);
                     } else {
-                        // Handle the case where the document doesn't exist
                     }
                 })
                 .addOnFailureListener(e -> {
-                    // Handle errors while fetching data
                 });
     }
     private void fetchShowing(String movieId){
-        db.collection("showing") // Replace "your_collection_name" with the actual name of your collection
+        db.collection("showing")
                 .whereEqualTo("filmId", movieId)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
@@ -216,7 +210,6 @@ public class BookingActivity extends AppCompatActivity {
                     updateSpinnerTime(timeOptions);
                 })
                 .addOnFailureListener(e -> {
-                    // Handle errors while fetching data
                 });
     }
     private Map<String, String> storeIdToNameMap = new HashMap<>();
@@ -235,11 +228,9 @@ public class BookingActivity extends AppCompatActivity {
                         }
                     }
 
-                    // Fetch store names based on store IDs
                     fetchStoreNames(storeIds);
                 })
                 .addOnFailureListener(e -> {
-                    // Handle errors while fetching data
                 });
     }
 
@@ -253,7 +244,6 @@ public class BookingActivity extends AppCompatActivity {
 
         Tasks.whenAllSuccess(tasks)
                 .addOnSuccessListener(storeNames -> {
-                    // All tasks completed successfully
                     List<String> storeNamesList = new ArrayList<>();
                     for (Object storeName : storeNames) {
                         if (storeName instanceof String) {
@@ -263,7 +253,6 @@ public class BookingActivity extends AppCompatActivity {
                     updateSpinnerCinema(storeNamesList);
                 })
                 .addOnFailureListener(e -> {
-                    // Handle errors while fetching store names
                 });
     }
 
@@ -281,19 +270,17 @@ public class BookingActivity extends AppCompatActivity {
                             tcs.setResult(storeName);
                         }
                     } else {
-                        // Handle the case where the store document doesn't exist
                         tcs.setException(new Exception("Store document doesn't exist"));
                     }
                 })
                 .addOnFailureListener(e -> {
-                    // Handle errors while fetching store names
                     tcs.setException(e);
                 });
 
         return tcs.getTask();
     }
     private void fetchDate(String movieId){
-        db.collection("showing") // Replace "your_collection_name" with the actual name of your collection
+        db.collection("showing")
                 .whereEqualTo("filmId", movieId)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
@@ -311,7 +298,6 @@ public class BookingActivity extends AppCompatActivity {
                     updateSpinnerDate(dateOptions);
                 })
                 .addOnFailureListener(e -> {
-                    // Handle errors while fetching data
                 });
     }
     private void updateSpinnerCinema(List<String> timeOptions) {
@@ -335,15 +321,13 @@ public class BookingActivity extends AppCompatActivity {
         showRating.setText(datum.getImdbRating());
 
 
-        // Convert the list of genres to a comma-separated string
         String genresString = String.join(", ", datum.getGenres());
 
-        // Assuming you have an ImageView for each additional image
         if (!datum.getImages().isEmpty()) {
             firstImageUrl = datum.getImages().get(0);
 
             Glide.with(this)
-                    .load(datum.getImages().get(0))  // Assuming getImages() returns a list of image URLs
+                    .load(datum.getImages().get(0))
                     .into(imageView);
         }
     }

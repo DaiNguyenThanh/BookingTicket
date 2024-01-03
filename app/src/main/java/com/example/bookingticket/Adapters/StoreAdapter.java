@@ -16,14 +16,12 @@ import java.util.List;
 
 public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.StoreViewHolder> {
 
-    private List<Store> storeList; // Assuming you have a model class named Store
+    private List<Store> storeList;
 
-    // Constructor to initialize the adapter with a list of stores
     public StoreAdapter(List<Store> storeList) {
         this.storeList = storeList;
     }
 
-    // ViewHolder class to hold references to the views in each item
     public static class StoreViewHolder extends RecyclerView.ViewHolder {
         ImageView imgItem;
         TextView txtName, txtAddress, txtPhone;
@@ -47,15 +45,12 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.StoreViewHol
 
     @Override
     public void onBindViewHolder(@NonNull StoreViewHolder holder, int position) {
-        // Bind data to the views in each item
         Store store = storeList.get(position);
         holder.txtName.setText(store.getTitle());
         holder.txtAddress.setText(store.getAddress());
         holder.txtPhone.setText(store.getPhone());
 
-        // You may use a library like Picasso or Glide to load the image
-        // Example using Picasso:
-        // Picasso.get().load(store.getImageUrl()).into(holder.imgItem);
+
     }
 
     @Override

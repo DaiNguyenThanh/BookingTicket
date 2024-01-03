@@ -52,8 +52,7 @@ public class ResultAdapter extends RecyclerView.Adapter<ResultAdapter.ViewHolder
                     .load(firstImage)
                     .into(holder.imageView);
         } else {
-            // Handle the case where there are no images
-            // holder.imageView.setImageResource(R.drawable.placeholder_image);
+
         }
         holder.itemView.setOnClickListener(v -> {
             if (listener != null && item != null) {

@@ -66,7 +66,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Initialize Firebase
         db = FirebaseFirestore.getInstance();
         moviesCollection = db.collection("films");
 
@@ -108,31 +107,21 @@ public class MainActivity extends AppCompatActivity {
         initView();
         banner();
         sendRequest();
-        sendRequestComingSoon(); // Uncomment and implement if needed
+        sendRequestComingSoon();
 
-        // Initialize your items (replace this with your data)
 
-        // Add items to allItems...
-
-        // Initialize UI components
-        // Initialize UI components
-        // Initialize views
         edtSearch = findViewById(R.id.edtSearch);
         recyclerView = findViewById(R.id.recyclerView);
 
-// Initialize Firebase Firestore
         db = FirebaseFirestore.getInstance();
 
-// Initialize ResultAdapter and set it to the RecyclerView
         resultAdapter = new ResultAdapter(new ArrayList<>());
         resultAdapter.setOnItemClickListener(item -> {
-            // Handle item click, e.g., start DetailActivity
             openDetailActivity(item);
         });
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(resultAdapter);
 
-// Set up TextWatcher for the search functionality
         edtSearch.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int start, int before, int count) {
@@ -140,7 +129,6 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence charSequence, int start, int before, int count) {
-                // Filter the movies based on the search text
                 loadMovies(charSequence.toString());
             }
 
@@ -166,31 +154,22 @@ public class MainActivity extends AppCompatActivity {
 
     private void loadMovies(String query) {
         if (!query.isEmpty()) {
-            // Reference to the "films" collection
             db.collection("films")
                     .whereGreaterThanOrEqualTo("title", query)
                     .whereLessThanOrEqualTo("title", query + "\uf8ff")
                     .get()
                     .addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
-                            // List to store movies
                             List<Datum> movies = new ArrayList<>();
-
-                            // Iterate through the documents in the collection
                             for (QueryDocumentSnapshot document : task.getResult()) {
                                 String documentId = document.getId();
-
-                                // Convert each document to a Movie object
                                 Datum movie = document.toObject(Datum.class);
                                 movie.setId(documentId);
                                 movies.add(movie);
                             }
 
-                            // Update the RecyclerView with the list of movies
                             resultAdapter.updateList(movies);
                         } else {
-                            // Handle errors
-                            // Log.e(TAG, "Error getting documents: ", task.getException());
                         }
                     });
         }
@@ -198,7 +177,6 @@ public class MainActivity extends AppCompatActivity {
     private List<String> filterItems(String query) {
         List<String> filteredList = new ArrayList<>();
         for (String item : allItems) {
-            // Implement your filtering logic here
             if (item.toLowerCase().contains(query.toLowerCase())) {
                 filteredList.add(item);
             }
@@ -247,7 +225,6 @@ public class MainActivity extends AppCompatActivity {
                     Log.e("error", "Error getting movies: ", e);
                 });
     }
-    // Implement sendRequestComingSoon() if needed
 
     private void banner() {
         List<SliderItem> sliderItems = new ArrayList<>();

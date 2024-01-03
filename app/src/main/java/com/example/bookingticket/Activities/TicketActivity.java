@@ -57,7 +57,7 @@ public class TicketActivity extends AppCompatActivity {
         textViewCinema.setText("Cinema: "+intent.getStringExtra("cinema"));
         textViewSeat.setText("Seat: "+intent.getStringExtra("seat"));
         Glide.with(this)
-                .load( intent.getStringExtra("image"))  // Assuming getImages() returns a list of image URLs
+                .load( intent.getStringExtra("image"))
                 .into(imageViewMovie);
       }
     }
@@ -89,13 +89,9 @@ public class TicketActivity extends AppCompatActivity {
                                 .load(imageUrl)
                                 .into(imageViewMovie);
                     } else {
-                        // Handle the case where the ticket document doesn't exist
-                        // You can display an error message or handle it as needed
                     }
                 })
                 .addOnFailureListener(e -> {
-                    // Handle errors while fetching ticket data
-                    // You can display an error message or handle it as needed
                 });
     }
 }

@@ -34,7 +34,6 @@ public class TicketAdapter extends RecyclerView.Adapter<TicketAdapter.ViewHolder
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Ticket ticket = ticketList.get(position);
-        // Bind the ticket data to the ViewHolder
         holder.bind(ticket);
     }
 
@@ -45,7 +44,6 @@ public class TicketAdapter extends RecyclerView.Adapter<TicketAdapter.ViewHolder
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
 
-        // Define your views in the ticket_item layout
         private ImageView imgItem;
         private TextView txtFilm;
         private TextView txtPrice;
@@ -53,12 +51,10 @@ public class TicketAdapter extends RecyclerView.Adapter<TicketAdapter.ViewHolder
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            // Initialize your views
             txtCinema = itemView.findViewById(R.id.txtName);
             imgItem = itemView.findViewById(R.id.imgItem);
             txtFilm = itemView.findViewById(R.id.txtFilm);
             txtPrice = itemView.findViewById(R.id.txtPrice);
-            // Other view bindings...
         }
 
         public void bind(Ticket ticket) {
@@ -68,10 +64,7 @@ public class TicketAdapter extends RecyclerView.Adapter<TicketAdapter.ViewHolder
             Glide.with(itemView.getContext())
                     .load(ticket.getImage())
                     .into(imgItem);
-            // Bind ticket data to views
-//            txtName.setText(ticket.getName());
-//            txtAddress.setText(ticket.getAddress());
-            // Other view bindings...
+
         }
     }
 }

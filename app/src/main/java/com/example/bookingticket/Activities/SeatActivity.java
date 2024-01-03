@@ -48,7 +48,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/*This class purpose is to build the seats viewGroup and for booking the seats.*/
 public class SeatActivity extends AppCompatActivity implements View.OnClickListener {
 
     ViewGroup groupLayout;
@@ -59,7 +58,6 @@ public class SeatActivity extends AppCompatActivity implements View.OnClickListe
     AlertDialog.Builder alertDialogBuilder;
     AlertDialog alertDialog;
 
-    /*example of seats string to define how the auditorium looks like. We will adjust it properly later.*/
     String seats = "_UUUUUAAAUU_/"
             + "__________/"
             + "UU_AAAUUU_UU/"
@@ -77,8 +75,7 @@ public class SeatActivity extends AppCompatActivity implements View.OnClickListe
     int STATUS_AVAILABLE = 1, STATUS_BOOKED = 2, audiID=0, movieID=0, screening_id;
     private String time = "", selectedIds = "", costumerName = "", costumerEmail = "", costumerPhone = "", movieTitle = "";
 
-    /*When creating the instance of this class, we get the intent from the purchaseActivity with all
-     * the extra data. This data will be saved on the DB tables after a successful booking.*/
+
     @SuppressLint({"MissingInflatedId"})
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -137,8 +134,7 @@ public class SeatActivity extends AppCompatActivity implements View.OnClickListe
             throw new RuntimeException(e);
         }
 
-        /*For loop to build the seats groupView from the seats string which contains how the view of the seats
-         * looks like, and set the margins, the id's, colors, etc..*/
+
         for (int index = 0; index < seats.length(); index++) {
             if (seats.charAt(index) == '/') {
                 layout = new LinearLayout(this);
@@ -199,14 +195,12 @@ public class SeatActivity extends AppCompatActivity implements View.OnClickListe
 //                    Toast.makeText(SeatActivity.this,"Fewer seats have been selected!!", Toast.LENGTH_LONG).show();
 //                }
                 else {
-                    //String[] seatsToBook = selectedIds.split(",");
                     FirebaseFirestore db = FirebaseFirestore.getInstance();
                     Intent intent1 = new Intent(SeatActivity.this, TicketActivity.class);
                     Intent intent = getIntent();
                     SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(SeatActivity.this);
                     String userId = preferences.getString("userUid", "DEFAULT_USER_ID");
 
-// Create the ticket data map
                     Map<String, Object> ticketData = new HashMap<>();
                     ticketData.put("film", intent.getStringExtra("title"));
                     ticketData.put("cinema", intent.getStringExtra("cinema"));
@@ -219,7 +213,6 @@ public class SeatActivity extends AppCompatActivity implements View.OnClickListe
                     ticketData.put("price", 100000*seatArray.size());
 
 
-// Add the document to the "tickets" collection
                     db.collection("tickets")
                             .add(ticketData)
                             .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
@@ -238,8 +231,6 @@ public class SeatActivity extends AppCompatActivity implements View.OnClickListe
                                 }
                             });
 
-                        /*After failing to book the tickets and displaying the error message
-                         * We finish this activity and back to the main activity.*/
 
                     intent1.putExtra("seat",seatArray.toString());
                     intent1.putExtra("cinema", intent.getStringExtra("cinema"));
@@ -256,11 +247,7 @@ public class SeatActivity extends AppCompatActivity implements View.OnClickListe
         });
     }
 
-    /*---------------------------------------------------------------------------------------------------------------*/
-    /*This method is called when a seat from the seat viewGroup is clicked.
-     * It will display a message when a booked seat is clicked.
-     * If available seat is clicked, it will add it to the selectedIds String and change its color to selected seat color.
-     * If selected seat is clicked, it will remove it from the selectedIds String and change its color to empty seat.*/
+
     @Override
     public void onClick(View view) {
         if ((int) view.getTag() == STATUS_AVAILABLE) {
@@ -302,8 +289,7 @@ public class SeatActivity extends AppCompatActivity implements View.OnClickListe
         finish();
     }
 
-    /*This method iterates on seats String, for each seat it checks if the seat is on reservedSeat list or not,
-     * if yes we define the seat as a booked seat, otherwise we define the seat as a available seat.*/
+
     public void buildSeats(List<Integer> tmp) {
         int fac = audiID == 1 ? 0 : (audiID-1)*60;
         int cnt = 0;
@@ -321,8 +307,7 @@ public class SeatActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    /*This procedure sends a message to the costumer after a successful booking.
-     * And displays a message after successful booking and sending message.*/
+
     public void sendMessage() {
         String error = "";
         String message = "Dear " + costumerName + ",\nWe have booked your seats!." +
@@ -368,30 +353,21 @@ public class SeatActivity extends AppCompatActivity implements View.OnClickListe
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
-                        // Assuming "seatBooked" is the array field you want to retrieve
                         List<Long> seatBookedList = (List<Long>) document.get("seatBooked");
 
                         if (seatBookedList != null) {
-                            // Check if any seatId in seatBookedList is present in the seatArray
                             for (Long seatId : seatBookedList) {
                                 if (seatArray.contains(seatId.intValue())) {
-                                    // SeatId is present in the array
-                                    // You can perform further actions here
-                                    // For example, you might want to update UI or perform some logic
-                                    // based on the seatId
+
                                 }
                             }
                         }
                     }
                 })
                 .addOnFailureListener(e -> {
-                    // Handle errors while fetching data
                 });
     }
-    /*This inner class have three modes:
-     * mode == 1, To retrieve the appropriate screening id.
-     * mode == 2, To retrieve the reserved seats of the specific screening id.
-     * mode == 3, To update the reservation and seats_reserved tables after a successful booking.*/
+
 
 
 

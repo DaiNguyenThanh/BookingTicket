@@ -9,10 +9,8 @@ import androidx.fragment.app.Fragment;
 import com.example.bookingticket.R;
 public class HomeFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_home, container, false);
 
-        // Any additional setup for your fragment can go here
 
         return view;
     }

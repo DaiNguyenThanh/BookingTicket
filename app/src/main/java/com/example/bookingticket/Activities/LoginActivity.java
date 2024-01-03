@@ -82,7 +82,6 @@ public class LoginActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-                            // Sign in success, update UI with the signed-in user's information
                             FirebaseUser user = mAuth.getCurrentUser();
                             startActivity(new Intent(LoginActivity.this, MainActivity.class));
                             finish();
@@ -90,14 +89,12 @@ public class LoginActivity extends AppCompatActivity {
 
                             btnLogin.setVisibility(View.GONE);
                         } else {
-                            // If sign in fails, display a message to the user.
                             Toast.makeText(LoginActivity.this, "Authentication failed.", Toast.LENGTH_SHORT).show();
                         }
                     }
                 });
     }
     private void saveUserInformation(FirebaseUser user) {
-        // Use SharedPreferences to save user information
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         SharedPreferences.Editor editor = preferences.edit();
 
@@ -107,10 +104,8 @@ public class LoginActivity extends AppCompatActivity {
             editor.putString("userEmail", user.getEmail());
             editor.putString("userName", user.getDisplayName());
 
-            // Set the login state flag to true
             editor.putBoolean("isLoggedIn", true);
 
-            // Commit the changes
             editor.apply();
         }
     }
