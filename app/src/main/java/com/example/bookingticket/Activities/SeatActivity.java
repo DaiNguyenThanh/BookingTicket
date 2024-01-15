@@ -58,15 +58,15 @@ public class SeatActivity extends AppCompatActivity implements View.OnClickListe
     AlertDialog.Builder alertDialogBuilder;
     AlertDialog alertDialog;
 
-    String seats = "_UUUUUAAAUU_/"
-            + "__________/"
-            + "UU_AAAUUU_UU/"
-            + "UU_UUAAAA_AA/"
-            + "AA_AAAAAA_AA/"
-            + "AA_AAUUUU_AA/"
-            + "UU_UUUUUU_AA/"
-            + "__________/";
-
+//    String seats = "_UUUUUAAAUU_/"
+//            + "__________/"
+//            + "UU_AAAUUU_UU/"
+//            + "UU_UUAAAA_AA/"
+//            + "AA_AAAAAA_AA/"
+//            + "AA_AAUUUU_AA/"
+//            + "UU_AAAAAA_AA/"
+//            + "__________/";
+    String seats=generateSeatsBasedOnCriteria((int)Math.floor(Math.random() * (6 - 3 + 1) + 3),10);
     List<TextView> seatViewList = new ArrayList<>();
     List<Integer> reservedSeats = new ArrayList<>();
      private Intent intent = getIntent();
@@ -367,6 +367,18 @@ public class SeatActivity extends AppCompatActivity implements View.OnClickListe
                 .addOnFailureListener(e -> {
                 });
     }
+    private String generateSeatsBasedOnCriteria(int numRows, int seatsPerRow) {
+        StringBuilder seatsBuilder = new StringBuilder();
+        for (int i = 0; i < numRows; i++) {
+            for (int j = 0; j < seatsPerRow; j++) {
+                seatsBuilder.append(Math.random() < 0.5 ? "A" : "U");
+            }
+            seatsBuilder.append("/");
+        }
+        return seatsBuilder.toString();
+    }
+
+
 
 
 

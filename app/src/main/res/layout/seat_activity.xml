@@ -27,18 +27,12 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:src="@drawable/baseline_arrow_back_24" />
-            <ImageView
-                android:layout_width="330dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="15dp"
-                android:layout_marginTop="25dp"
-                android:background="@drawable/screenthumb"></ImageView>
 
 
             <HorizontalScrollView
                 android:id="@+id/layoutSeat"
                 android:layout_width="match_parent"
-                android:layout_height="230dp"
+                android:layout_height="wrap_content"
                 android:layout_marginTop="70dp" />
 
             <LinearLayout
@@ -102,7 +96,12 @@
                 </TextView>
 
             </LinearLayout>
-
+            <ImageView
+                android:layout_width="330dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="15dp"
+                android:layout_marginTop="25dp"
+                android:background="@drawable/screenthumb"></ImageView>
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/bookTicketsBttn"
                 android:layout_width="match_parent"
